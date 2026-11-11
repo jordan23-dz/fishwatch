@@ -3,7 +3,6 @@ on:
   workflow_dispatch:
   release:
     types: [published]
-
 permissions:
   contents: write
 env:
@@ -17,20 +16,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install PyInstaller
-        run: python -m pip install "pyinstaller==6.11.1"
-      - name: Smoke test (mock run)
-        run: python run.py --mock
-      - name: Build exe
-        run: python -m PyInstaller --noconfirm --clean fishwatch.spec
-      - name: Test exe (mock run)
-        run: dist\FishWatch.exe --run-once --mock
+      - run: python -m pip install "pyinstaller==6.11.1"
+      - run: python -X utf8 run.py --mock
+      - run: python -m PyInstaller --noconfirm --clean fishwatch.spec
+      - run: dist\FishWatch.exe --run-once --mock
       - uses: actions/upload-artifact@v4
         with:
           name: FishWatch-exe
           path: dist/FishWatch.exe
-      - name: Attach exe to release
-        if: github.event_name == 'release'
+      - if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
           files: dist/FishWatch.exe
