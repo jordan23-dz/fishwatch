@@ -14,7 +14,7 @@ import shutil
 import sys
 from pathlib import Path
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 FROZEN = bool(getattr(sys, "frozen", False))
 
 if FROZEN:
@@ -30,6 +30,22 @@ else:
     EXE_DIR = DATA
 
 DATA.mkdir(parents=True, exist_ok=True)
+
+
+def warm_up() -> None:
+    """점검 도중에야 처음 불러오는 표준 모듈을 시작할 때 미리 불러 둔다.
+    (exe에서 실행 중 모듈을 늦게 불러오다 백신 잠금에 걸리는 일을 막음)"""
+    import datetime as _dt
+    import urllib.request as _ur
+    try:
+        _dt.datetime.strptime("20260101", "%Y%m%d")   # _strptime
+        "naver.com".encode("idna")                     # encodings.idna, unicodedata
+        "가".encode("utf-8-sig"); "가".encode("cp949")  # CSV 보고서, 한국어 Windows
+        _ur.getproxies()                                # Windows 프록시 설정(winreg)
+        import csv, html, http.client, json, ssl, sqlite3, tomllib, webbrowser  # noqa: F401,E401
+        ssl.create_default_context()
+    except Exception:
+        pass
 
 # 예전 폴더판에서 옮겨 올 때: exe 옆에 둔 config.toml / fishwatch.db 를 처음 한 번 DATA로 복사
 if FROZEN and DATA != EXE_DIR:

@@ -21,7 +21,7 @@ if sys.version_info < (3, 11):
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from paths import DATA, EXE_DIR, FROZEN, RES, VERSION  # noqa: E402
+from paths import DATA, EXE_DIR, FROZEN, RES, VERSION, warm_up  # noqa: E402
 import os  # noqa: E402
 import subprocess  # noqa: E402
 from analyzer import RULES, analyze  # noqa: E402
@@ -49,6 +49,11 @@ def start_run(mock: bool) -> bool:
             def progress(done, total, cand):
                 STATE["progress"] = {"done": done, "total": total, "candidates": cand}
             STATE["last"] = run_once(load_config(), mock=mock, log=log, progress=progress)
+        except PermissionError as e:
+            STATE["error"] = ("파일 접근이 거부되었습니다. 백신(V3·알약·Windows 보안)이 FishWatch.exe를 검사하며 잠근 경우가 많습니다. "
+                              "백신 예외에 FishWatch.exe를 추가하고 앱을 다시 실행하세요. (" + str(e) + ")")
+            log("오류: " + STATE["error"])
+            traceback.print_exc()
         except Exception as e:  # 화면에 그대로 보여 준다
             STATE["error"] = str(e)
             log(f"오류: {e}")
@@ -277,6 +282,7 @@ def main():
         sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
         pass
+    warm_up()
     if "--run-once" in sys.argv:
         run_once_cli()
         return
