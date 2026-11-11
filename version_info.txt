@@ -1,0 +1,15 @@
+VSVersionInfo(
+  ffi=FixedFileInfo(filevers=(1, 0, 0, 0), prodvers=(1, 0, 0, 0), mask=0x3f, flags=0x0, OS=0x40004,
+                    fileType=0x1, subtype=0x0, date=(0, 0)),
+  kids=[
+    StringFileInfo([StringTable('041204B0', [
+      StringStruct('CompanyName', 'FishWatch'),
+      StringStruct('FileDescription', 'FishWatch - 수산물 판매글 금어기·금지체장 점검'),
+      StringStruct('FileVersion', '1.0.0'),
+      StringStruct('InternalName', 'FishWatch'),
+      StringStruct('OriginalFilename', 'FishWatch.exe'),
+      StringStruct('ProductName', 'FishWatch'),
+      StringStruct('ProductVersion', '1.0.0')])]),
+    VarFileInfo([VarStruct('Translation', [1042, 1200])])
+  ]
+)

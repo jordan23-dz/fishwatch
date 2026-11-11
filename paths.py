@@ -1,0 +1,42 @@
+"""파일 위치.
+
+- RES : 앱에 들어 있는 읽기 전용 파일(rules.json, ui/, sample_api/)
+- DATA: 사용자가 바꾸는 파일(config.toml, fishwatch.db, reports/)
+
+그냥 실행(python app.py)하면 둘 다 이 폴더.
+exe로 실행하면 RES는 exe 안(임시 폴더), DATA는 %APPDATA%\\FishWatch (없으면 홈 폴더 아래 FishWatch).
+exe 옆에 'portable.txt' 파일을 두면 DATA를 exe가 있는 폴더로 쓴다(USB 등에 넣고 다닐 때).
+"""
+from __future__ import annotations
+
+import os
+import shutil
+import sys
+from pathlib import Path
+
+VERSION = "1.0.0"
+FROZEN = bool(getattr(sys, "frozen", False))
+
+if FROZEN:
+    RES = Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent))
+    EXE_DIR = Path(sys.executable).resolve().parent
+    if (EXE_DIR / "portable.txt").exists():
+        DATA = EXE_DIR
+    else:
+        base = os.environ.get("APPDATA") or os.environ.get("XDG_CONFIG_HOME") or str(Path.home())
+        DATA = Path(base) / "FishWatch"
+else:
+    RES = DATA = Path(__file__).resolve().parent
+    EXE_DIR = DATA
+
+DATA.mkdir(parents=True, exist_ok=True)
+
+# 예전 폴더판에서 옮겨 올 때: exe 옆에 둔 config.toml / fishwatch.db 를 처음 한 번 DATA로 복사
+if FROZEN and DATA != EXE_DIR:
+    for name in ("config.toml", "fishwatch.db"):
+        src, dst = EXE_DIR / name, DATA / name
+        if src.exists() and not dst.exists():
+            try:
+                shutil.copy2(src, dst)
+            except OSError:
+                pass
