@@ -273,7 +273,8 @@ def run_once_cli() -> None:
 
 def main():
     try:
-        sys.stdout.reconfigure(errors="replace")
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
         pass
     if "--run-once" in sys.argv:

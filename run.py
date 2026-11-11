@@ -11,6 +11,12 @@ import sys
 from datetime import date
 from pathlib import Path
 
+# 한글 출력이 영문 인코딩(cp1252) 환경에서도 깨지거나 멈추지 않게 (GitHub 빌드 서버, 작업 스케줄러 등)
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 if sys.version_info < (3, 11):
     sys.exit("Python 3.11 이상이 필요합니다.")
 sys.path.insert(0, str(Path(__file__).resolve().parent))
