@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 108dp 적응형 아이콘 전경: 물고기 + 계측 자 눈금 (안전 영역 21~87 안) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M28,50 C36,36 60,35 71,50 C60,65 36,64 28,50 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M69,50 L83,39 L80,50 L83,61 Z" />
+    <path
+        android:fillColor="#0D5C6C"
+        android:pathData="M37,48 m-2.6,0 a2.6,2.6 0,1 1,5.2 0 a2.6,2.6 0,1 1,-5.2 0" />
+    <path
+        android:fillColor="#0D5C6C"
+        android:pathData="M45,40 C47,45 47,55 45,60 L46.6,60 C48.6,55 48.6,45 46.6,40 Z" />
+    <path
+        android:fillColor="#9FD3DC"
+        android:pathData="M27,70 L83,70 L83,71.6 L27,71.6 Z" />
+    <path
+        android:fillColor="#9FD3DC"
+        android:pathData="M27,71.6 h1.2 v6 h-1.2 Z M34,71.6 h1 v3 h-1 Z M41,71.6 h1 v3 h-1 Z M48,71.6 h1 v3 h-1 Z M54.4,71.6 h1.2 v6 h-1.2 Z M62,71.6 h1 v3 h-1 Z M69,71.6 h1 v3 h-1 Z M76,71.6 h1 v3 h-1 Z M81.8,71.6 h1.2 v6 h-1.2 Z" />
+</vector>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <color name="fw_paper">#0E1615</color>
+    <color name="fw_teal">#5DB0BF</color>
+    <style name="Theme.FishWatch" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/fw_paper</item>
+        <item name="android:colorPrimary">@color/fw_teal</item>
+        <item name="android:colorAccent">@color/fw_teal</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+    </style>
+</resources>

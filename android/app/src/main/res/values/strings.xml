@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FishWatch</string>
+    <string name="channel_alerts">의심 판매글 알림</string>
+    <string name="channel_alerts_desc">자동 점검에서 새 위반 의심 판매글을 찾으면 알려 줍니다.</string>
+</resources>

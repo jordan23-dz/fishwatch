@@ -1,0 +1,52 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    // 패키지 이름(applicationId)은 Play에 처음 올린 뒤에는 바꿀 수 없습니다.
+    // 다른 이름을 쓰려면 첫 업로드 전에 applicationId만 바꾸세요.
+    namespace 'kr.fishwatch.checker'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'kr.fishwatch.checker'
+        minSdk 26
+        targetSdk 36
+        versionCode 10106
+        versionName '1.1.6'
+    }
+
+    signingConfigs {
+        // GitHub Actions 등에서 환경변수로 서명할 때만 사용합니다.
+        // Android Studio의 [Generate Signed App Bundle]을 쓰면 이 설정은 필요 없습니다.
+        release {
+            def ks = System.getenv('FW_KEYSTORE_FILE')
+            if (ks) {
+                storeFile file(ks)
+                storePassword System.getenv('FW_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('FW_KEY_ALIAS')
+                keyPassword System.getenv('FW_KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (System.getenv('FW_KEYSTORE_FILE')) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.14.0'
+    implementation 'androidx.work:work-runtime:2.10.0'
+    implementation 'androidx.javascriptengine:javascriptengine:1.1.0'
+}
