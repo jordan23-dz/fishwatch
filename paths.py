@@ -14,7 +14,7 @@ import shutil
 import sys
 from pathlib import Path
 
-VERSION = "1.1.3"
+VERSION = "1.1.4"
 FROZEN = bool(getattr(sys, "frozen", False))
 
 MAC = sys.platform == "darwin"
