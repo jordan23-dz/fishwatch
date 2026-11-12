@@ -42,7 +42,18 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
+      # 빌드 컴퓨터(ubuntu)에 이미 깔린 Android SDK를 쓴다. 라이선스 동의 + 필요한 플랫폼만 설치
+      - name: Prepare Android SDK
+        shell: bash
+        run: |
+          SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          SDKM="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          [ -x "$SDKM" ] || SDKM="$(ls -d "$SDK"/cmdline-tools/*/bin/sdkmanager | tail -1)"
+          echo "sdkmanager: $SDKM"
+          yes | "$SDKM" --licenses > /dev/null || true
+          "$SDKM" "platforms;android-36" "platform-tools" > /dev/null || echo "플랫폼은 빌드 중에 자동으로 받습니다"
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "sdk.dir=$SDK" > "${{ steps.dir.outputs.path }}/local.properties"
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build test APK
