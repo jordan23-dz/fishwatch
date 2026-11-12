@@ -133,7 +133,7 @@ def open_db(cfg: dict) -> sqlite3.Connection:
         id INTEGER PRIMARY KEY AUTOINCREMENT, started TEXT, finished TEXT, mock INTEGER,
         calls INTEGER, candidates INTEGER, danger INTEGER, warn INTEGER, new INTEGER, report TEXT, error TEXT)""")
     rcols = {r[1] for r in db.execute("PRAGMA table_info(runs)")}
-    for col, typ in (("info", "INTEGER DEFAULT 0"), ("funnel", "TEXT")):
+    for col, typ in (("info", "INTEGER DEFAULT 0"), ("funnel", "TEXT"), ("xlsx", "TEXT")):
         if col not in rcols:
             db.execute(f"ALTER TABLE runs ADD COLUMN {col} {typ}")
     db.commit()
@@ -220,11 +220,13 @@ def _run(cfg: dict, mock: bool, day: date, started: str, log, progress=None) -> 
                "danger": sum(1 for x in rows if x["result"]["sev"] == "danger"),
                "warn": sum(1 for x in rows if x["result"]["sev"] == "warn"),
                "info": sum(1 for x in rows if x["result"]["sev"] in ("info", "ok")),
-               "new": len(new_links), "report": str(paths[0])}
+               "new": len(new_links), "report": str(paths[0]),
+               "xlsx": next((str(p) for p in paths if p.suffix == ".xlsx"), None)}
     summary["funnel"] = funnel + f" → 규제 어종이 나온 글 {len(rows)}개 (위반 의심 {summary['danger']} · 확인 필요 {summary['warn']} · 참고 {summary['info']})"
-    db.execute("INSERT INTO runs(started,finished,mock,calls,candidates,danger,warn,new,report,info,funnel) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+    db.execute("INSERT INTO runs(started,finished,mock,calls,candidates,danger,warn,new,report,info,funnel,xlsx) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
                (summary["started"], summary["finished"], int(mock), summary["calls"], summary["candidates"],
-                summary["danger"], summary["warn"], summary["new"], summary["report"], summary["info"], summary["funnel"]))
+                summary["danger"], summary["warn"], summary["new"], summary["report"], summary["info"], summary["funnel"],
+                summary["xlsx"]))
     db.commit()
     db.close()
     log(f"규제 어종이 나온 글 {len(rows)}개 (어종 없음 {no_species}개) · 위반 의심 {summary['danger']} · 확인 필요 {summary['warn']} · 참고 {summary['info']} · 신규 {summary['new']}")

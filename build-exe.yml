@@ -1,0 +1,62 @@
+# GitHub에서 FishWatch를 자동으로 만든다.
+# - Windows: FishWatch.exe   - macOS(Apple 칩): FishWatch-mac.zip (안에 FishWatch.app)
+# - Actions 탭 → "Build FishWatch.exe" → Run workflow : 시험 빌드 (결과물은 Artifacts)
+# - Releases → Draft a new release → 태그(v1.1.0 등) 만들고 Publish : 배포판에 두 파일이 자동으로 붙음
+name: Build FishWatch.exe
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+permissions:
+  contents: write
+env:
+  PYTHONUTF8: '1'
+  PYTHONIOENCODING: utf-8
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use app folder (저장소 안 fishwatch 폴더에 올린 경우)
+        shell: bash
+        run: if [ -f fishwatch/app.py ] && [ ! -f app.py ]; then cp -R fishwatch/. . ; fi
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install "pyinstaller==6.11.1"
+      - run: python -X utf8 run.py --mock
+      - run: python -m PyInstaller --noconfirm --clean fishwatch.spec
+      - run: dist\FishWatch.exe --run-once --mock
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FishWatch-windows
+          path: dist/FishWatch.exe
+      - if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/FishWatch.exe
+
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use app folder (저장소 안 fishwatch 폴더에 올린 경우)
+        shell: bash
+        run: if [ -f fishwatch/app.py ] && [ ! -f app.py ]; then cp -R fishwatch/. . ; fi
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install "pyinstaller==6.11.1"
+      - run: python -X utf8 run.py --mock
+      - run: python -m PyInstaller --noconfirm --clean fishwatch.spec
+      - run: dist/FishWatch.app/Contents/MacOS/FishWatch --run-once --mock
+      - name: Zip app
+        run: ditto -c -k --keepParent dist/FishWatch.app FishWatch-mac.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FishWatch-mac
+          path: FishWatch-mac.zip
+      - if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: FishWatch-mac.zip

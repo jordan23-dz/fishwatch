@@ -8,6 +8,7 @@ from datetime import date
 from pathlib import Path
 
 from analyzer import SEV, SEV_LABEL
+from xlsx import write_xlsx
 
 CSS = """
 :root{--paper:#EDF1F0;--surface:#fff;--sunk:#F5F8F7;--ink:#13201E;--muted:#5A6A67;--line:#D2DBD9;--accent:#0D5C6C;
@@ -72,15 +73,42 @@ fs.onchange=fv.onchange=fn.onchange=f;</script></body></html>"""
     html_path.write_text(page, encoding="utf-8")
     (out_dir / "latest.html").write_text(page, encoding="utf-8")
 
+    headers = ["등급", "신규", "사이트", "제목", "링크", "작성일", "어종", "사유", "검색어", "최초 발견"]
+    rows = []
+    for x in sorted(all_rows, key=lambda x: (-SEV[x["result"]["sev"]], not x["new"], x["item"].site)):
+        it, r = x["item"], x["result"]
+        bad = [f for f in r["findings"] if SEV[f["sev"]] >= SEV["warn"]]
+        rows.append([SEV_LABEL[r["sev"]], "Y" if x["new"] else "", it.site, it.title, it.link,
+                     str(it.post_date or ""), ", ".join(f["name"] for f in (bad or r["findings"])),
+                     " / ".join(i["txt"] for f in bad for i in f["items"] if i["sev"] in ("danger", "warn")),
+                     it.query, x["first_seen"]])
+
     csv_path = out_dir / f"report-{stamp}.csv"
     with csv_path.open("w", newline="", encoding="utf-8-sig") as fh:
         w = csv.writer(fh)
-        w.writerow(["등급", "신규", "사이트", "제목", "링크", "작성일", "어종", "사유", "검색어", "최초 발견"])
-        for x in sorted(all_rows, key=lambda x: -SEV[x["result"]["sev"]]):
-            it, r = x["item"], x["result"]
-            bad = [f for f in r["findings"] if SEV[f["sev"]] >= SEV["warn"]]
-            w.writerow([SEV_LABEL[r["sev"]], "Y" if x["new"] else "", it.site, it.title, it.link,
-                        it.post_date or "", ", ".join(f["name"] for f in (bad or r["findings"])),
-                        " / ".join(i["txt"] for f in bad for i in f["items"] if i["sev"] in ("danger", "warn")),
-                        it.query, x["first_seen"]])
-    return [html_path, csv_path]
+        w.writerow(headers)
+        w.writerows(rows)
+
+    # 엑셀 파일: 결과 시트(첫 줄 고정·필터·링크 클릭·등급 색) + 요약 시트
+    xlsx_path = out_dir / f"report-{stamp}.xlsx"
+    by_sev = {}
+    by_site = {}
+    for row in rows:
+        by_sev[row[0]] = by_sev.get(row[0], 0) + 1
+        if row[0] in ("위반 의심", "확인 필요"):
+            d = by_site.setdefault(row[2], [0, 0])
+            d[0 if row[0] == "위반 의심" else 1] += 1
+    summary = [["실행 시각", now], ["판독 기준일", str(day)], ["판독한 판매글", len(rows)]] + \
+              [[k, by_sev.get(k, 0)] for k in ("위반 의심", "확인 필요", "참고", "기준 내")] + \
+              [["", ""], ["사이트", "위반 의심 / 확인 필요"]] + \
+              [[s, f"{v[0]} / {v[1]}"] for s, v in sorted(by_site.items(), key=lambda kv: -sum(kv[1]))] + \
+              [["", ""], ["안내", "검색 결과의 제목·요약문만 판독한 1차 선별 결과입니다. 원문과 원산지·어획일을 확인한 뒤 판단하세요."]]
+    try:
+        write_xlsx(xlsx_path, [
+            {"name": "점검 결과", "headers": headers, "rows": rows,
+             "widths": [10, 6, 12, 50, 40, 11, 14, 60, 22, 18], "link_col": 4, "sev_col": 0},
+            {"name": "요약", "headers": ["항목", "값"], "rows": summary, "widths": [22, 60]},
+        ])
+    except OSError:
+        xlsx_path = None  # 엑셀 파일을 못 써도 점검 자체는 성공으로
+    return [p for p in (html_path, csv_path, xlsx_path) if p]

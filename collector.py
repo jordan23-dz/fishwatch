@@ -97,6 +97,15 @@ NOT_TRADE = re.compile(
     r"방충망|시공|입주|아파트|분양|청소|이사\b|학원|과외|부동산|렌탈|보험|대출|채용|구인|구직|"
     # 자동차·법률 등 다른 주제 (예: "중고차 3자 사기", "필랑트 누아르 에디션 1,000대")
     r"중고차|자동차|신차|에디션|시승|출고|전시장|대리점|딜러|리스\b|타이어|르노|현대차|기아|"
+    r"차이점|가이드|활용\s*팁|총정리|알아보|정리했|효능|칼로리|영양|백과|사전|수산학|"
+    r"KBS|MBC|SBS|JTBC|tvN|생생정보|방송|메뉴|아르바이트|알바|모집|모임|찾아요|주인\s*찾|분실|실종|"
+    r"탐방|전시|박람회|엑스포|엑스코|"
+    # 사는 곳을 묻는 질문, 당근 동네생활 글("… | ○○동")
+    r"아시는\s*분|아실까요|아는\s*분|어디서|어디\s*(?:있|가|서)|파는\s*곳|판매하는\s*곳|살\s*수\s*있는|먹을\s*수\s*있는|먹을수있는|살수있는|"
+    r"추천\s*(?:해|좀|부탁)|질문|궁금|\|\s*[가-힣0-9]+(?:동|읍|면|리|가)\s*$|"
+    # 시세 정리·방문 안내 글
+    r"뜻\s*[:은]|보는\s*법|가격\s*20\d\d|첫\s*위판|솔직한|싶었던|"
+    r"시세\s*(?:·|정리|체크|비교|확인)|기준\s*정리|가기\s*전에|비용\s*체크|"
     r"\d자\s*사기|사기\s*(?:피해|사건|당|수법|예방|죄)|소송|변호사|법률|법무|판례|판결|고소|전세|월세|청약")
 SALE_INTENT = TRADE_WORDS  # 이전 이름 호환
 
@@ -116,12 +125,88 @@ NON_SEAFOOD = re.compile(
     r"[A-Za-z]?\d{3,4}\s*-?\s*(?:UL|L|ML|M|MH|H|XH)(?![A-Za-z])|"
     r"씨호크|시마노|다이와|바낙스|엔에스|해동조구|아부가르시아|메이저크래프트|테일워크|제이에스컴퍼니|한조|은성|용성|쯔리겐|"
     r"가마가츠|도요피싱|썬라인|요즈리|듀엘|"
-    r"대부분\s*어종|전\s*어종|다\s*어종|어종\s*불문")
+    r"대부분\s*어종|전\s*어종|다\s*어종|어종\s*불문|"
+    # 낚시 소품: 쇼크리더·와이어·케미·배터리·웜 등과 미끼·채비 브랜드
+    r"쇼크리더|와이어|케미|캐미|밧데리|배터리|건전지|다운샷|티탄|낚시줄|낚싯줄|\d+(?:\.\d+)?\s*파이|\d+\s*인치|\d+\s*mm\b|"
+    r"[가-힣]{1,4}(?:용품|채비)\s*판매|(?:광어|우럭|갈치|풀치|쭈꾸미|주꾸미|문어)\s*(?:우럭|광어)?\s*용(?![가-힣])|[가-힣]{1,3}전용(?![가-힣])|"
+    r"슈어캐치|워터맨|버클리|엘리게이터|비글|조구|샌드사딘|얼라이브|"
+    # 화투·놀이·문화 상품 ('고도리'는 화투 용어로도 쓰임)
+    r"화투|고스톱|맞고|오광|홍단|청단|피박|퍼즐|보드게임|게임|소설|장편|만화|웹툰|굿즈|"
+    # 반려동물 간식·용품
+    r"강아지|고양이|반려견|반려묘|반려동물|애견|애묘|펫(?=[가-힣\s])|트릿|"
+    # 주방·생활용품
+    r"찜기|찜솥|냄비|무시깡|모카포트|커피메이커|알레시|Alessi|가위|집게|도마|"
+    # 수집품·전자 장난감
+    r"우표|수집품|기념주화|엽서|RC|rc카|알씨|송수신기|드론|"
+    # 신발·옷
+    r"운동화|스니커즈|방한화|부츠|슬리퍼|신발|의류|티셔츠|후드|모자|"
+    # '뺀찌'는 공구(펜치)로도 쓰임
+    r"펜치|뺀치|뻰지|뺀지|밴찌|니빠|니뻐|니퍼|플라이어|공구|롱노즈|롱노우즈|압착|컷팅|절단기|스패너|몽키|망치|로보스터|로보스타|LOBSTER|고바야시|타바타|"
+    r"(?:공업|전기|작업|다용도|전공|강력)\s*뺀찌|뺀찌\s*(?:깡|공구|세트)|"
+    # '톳'은 김을 세는 단위(1톳=100장)로도 쓰임
+    r"[가-힣]*김(?=\s|$|\d|\()|김밥|\d+\s*톳|톳\s*\(?\s*\d+\s*(?:장|매|g)|"
+    # '천초'는 향신료(초피), '깔따구'는 벌레로도 쓰임
+    r"초피|제피|젠피|산초|약초|열매|유충|샤워기|세면대|수전|필터|정수|모기|해충|벌레|방충|하루살이|단열\s*필름|"
+    # 화장품·장신구·공예, 노래·음원, 음료·빨대, 상품권, 술
+    r"클렌징|폼\b|화장|세안|목걸이|귀걸이|팔찌|반지|액세서리|공예|껍질|골동품|노래(?!미)|메들리|음원|앨범|USB|음향|"
+    r"채칼|채반|채망|틀\b|젤리|스트로우|빨대|슬러시|음료|기프티콘|상품권|금액권|\d+\s*만원권|와인|소주|맥주|막걸리|"
+    # 사람 구함·동행 모집, 결제창
+    r"구합니다|동출|동행|결제창|소통방|단톡|오픈채팅|보러가기|"
+    # 바로 먹는 조리 식품
+    r"덮밥|냉면|라면|컵면|미역국|국물용|한상(?!자)|크랩\s*스톡|풀치대|갈치대|낚싯대|크래미|맛살|게살|대게살|붉은대게살|파지|"
+    # 포장 용기·선물 이벤트·귀금속·교육기관
+    r"용기(?![가-힣])|포장재|아이스팩|용돈|이벤트\s*박스|실버바|골드바|인증\d+|어린이집|유치원|학급|학원|"
+    # 과자·사탕, 벌레 퇴치, 앞치마, 축하 화분
+    r"캬라멜|카라멜|캔디|사탕|누룽지|칩(?![가-힣])|과자|트랩|퇴치|날파리|초파리|거세|앞치마|비닐가운|승진\s*축하|개업\s*(?:식|축하)|화분|유정란|펜션|페스룸|날자!?\s*고도리")
 # 낚시용품일 때가 많지만 잡은 고기를 파는 글에도 나오는 말: 제목에 '잡은·조과·팝니다·kg·마리' 등이 없을 때만 낚시용품으로 본다
 GEAR_WEAK = re.compile(r"[가-힣]{1,3}낚시(?![가-힣])|원투|메탈|스푼|바이브|만능|선상\s*전용")
 CATCH_SALE = re.compile(r"잡은|잡아|잡았|조과|팝니다|판매합니다|팔아요|\d\s*(?:kg|키로|마리|미(?![가-힣]))")
 # 판매자 홈·상점 첫 화면 (상품 글이 아님)
-STORE_HOME_TITLE = re.compile(r"^(?:G마켓|옥션|11번가|쿠팡)\s*[-:|]|미니샵|스토어\s*홈|:\s*네이버\s*(?:스마트)?스토어$|판매자\s*홈")
+STORE_HOME_TITLE = re.compile(
+    r"^(?:G마켓|옥션|11번가|쿠팡)\s*[-:|]|미니샵|스토어\s*홈|:\s*네이버\s*(?:스마트)?스토어$|판매자\s*홈|"
+    r"님의\s*프로필|의\s*(?:상점|가게|프로필)(?:\s*[-|]|$)|\|\s*당근\s*검색|검색\s*결과|"
+    # 분류 경로(빵 부스러기): "매생이/톳/해조류 | 김/미역/기타해조류 | 수산물/건해산"
+    r"^[^|\d]*/[^|\d]*\|[^|\d]*/[^|\d]*\|")
+# 상품 글이 아닌 분류(목록) 페이지: "꽃게/대게/킹크랩", "대게/홍게 - 옥션", "대게 - 새우/게/갑각류"
+LISTING_TITLE = re.compile(r"^[가-힣A-Za-z]{1,8}(?:\s*[/ㆍ·,]\s*[가-힣A-Za-z]{1,8})*(?:\s+-\s+[^-|]{1,25})?$")
+# 당근 업체 글: "글 제목 | 시·군·구 동네 | 업종"
+DAANGN_BIZ = re.compile(r"^([^|]{1,60}?)\s*\|\s*[^|]*[가-힣]+(?:시|도|군|구)\s[^|]*\|\s*[^|]*$")
+BIZ_SALE = re.compile(r"\d|[!?~]|예약|입고|왔어|도착|판매|팝니다|팔아|생물|활|국내산|자연산|원가|털|특가|할인|개시|오픈|마감|남았|드세요|"
+                      r"챙겨|드실|주문|배송|택배|산지|당일|오늘|싱싱|제철|가격|세일|이벤트")
+
+
+def daangn_biz(title: str) -> str | None:
+    """당근 업체 글이면 'sale'(소식·판매 글) 또는 'home'(가게 이름만 있는 업체 소개)."""
+    m = DAANGN_BIZ.match(title or "")
+    if not m:
+        return None
+    return "sale" if BIZ_SALE.search(m.group(1)) else "home"
+LISTING_SALE = re.compile(r"특가|입고|활|생물|직송|당일|판매|할인|팝니다|팔아요|자연산|국내산|제철|\d")
+
+
+def bare_listing(title: str) -> bool:
+    t = (title or "").strip()
+    if not LISTING_TITLE.match(t) or LISTING_SALE.search(t):
+        return False
+    return "/" in t or "ㆍ" in t or bool(re.search(r"\s-\s", t))
+# 쇼핑몰 제목 끝의 " - 분류" 가 수산물 분류가 아니면 수산물 상품이 아니다 (예: "… - 운동화/스니커즈", "… - 직소퍼즐")
+CATEGORY_TAIL = re.compile(r"\s[-|]\s([^-|]{2,30})$")
+SEAFOOD_CATEGORY = re.compile(r"생선|수산|해산|게|새우|조개|굴|전복|오징어|문어|낙지|주꾸미|쭈꾸미|어란|회|갈치|고등어|명태|동태|"
+                              r"해조|미역|톳|다시마|김\b|멸치|농수축산|건어물|장어|연어|참치|광어|우럭|방어|어류|활어|선어|홍합|소라|해삼|성게|멍게")
+SITE_NAMES = re.compile(r"^(?:옥션|G마켓|11번가|쿠팡|당근|번개장터|SSG|SSG닷컴|롯데ON|롯데온|다음\s*카페|네이버\s*블로그|네이버\s*카페|"
+                        r"네이버\s*쇼핑|스마트\s*스토어|브랜드\s*스토어|위메프|티몬|인터파크|톡딜|카카오|테무|알리익스프레스)")
+
+
+def non_seafood_category(title: str) -> bool:
+    if daangn_biz(title) == "sale":   # 업종이 '과일판매'여도 수산물을 판다고 쓴 글은 남긴다
+        return False
+    m = CATEGORY_TAIL.search(title or "")
+    if not m:
+        return False
+    cat = m.group(1).strip()
+    if SITE_NAMES.match(cat) or "모바일" in cat:
+        return False
+    return not SEAFOOD_CATEGORY.search(cat)
 
 
 def is_store_home(link: str, title: str) -> bool:
@@ -132,7 +217,7 @@ def is_store_home(link: str, title: str) -> bool:
         return True
     if host.endswith(("smartstore.naver.com", "brand.naver.com")) and len(segs) <= 1:
         return True
-    return bool(STORE_HOME_TITLE.search(title or ""))
+    return bool(STORE_HOME_TITLE.search(title or "")) or daangn_biz(title) == "home"
 
 
 def many_species(title: str) -> bool:
@@ -144,7 +229,12 @@ def many_species(title: str) -> bool:
 PROCESSED = re.compile(
     r"가공|반건조|건조|말린|훈제|젓갈|액젓|[가-힣]+젓(?![가-힣])|염장|절임|장아찌|통조림|어묵|어포|쥐포|북어포|황태포|"
     r"오징어채|진미채|조림|양념|무침|튀김|밀키트|간편식|레토르트|엑기스|분말|가루|"
-    r"황태|북어|먹태|코다리|과메기|굴비|노가리\s*(?:구이|안주)")
+    r"황태|북어|먹태|코다리|과메기|굴비|노가리\s*(?:구이|안주)|"
+    r"이유식|볶음밥|솥밥|죽\s*키트|[가-힣]{0,4}죽(?![가-힣])|김치|만두|어육|부각|튀각|명태전|동태전|생선전|게장|간장게장|양념게장|전복장|새우장|"
+    r"알포|어포|스틱|소시지|햄|통조림|캔(?![가-힣])|간편|즉석|데우기만|"
+    r"소금|국수|쌀국수|묵(?![가-힣])|묵채|콩물|다시팩|간장|맛간장|[가-힣]*탕(?![가-힣])|빵(?![가-힣])|밥톳|톳밥|[가-힣]{1,3}밥(?![가-힣])|"
+    r"찐톳|데친|숙회|내장|해초\s*모듬|모듬\s*해초|명태녹차|수제\s*간식|"
+    r"굴소스|소스|육수|진액|농축액|엑기스|추출물|딱지장|명란장|장조림|한천|우무채|우무(?![가-힣])|녹미채|조미|노가리|숏다리|구이|계란말이|스팀볼")
 IMPORTED = re.compile(r"수입|러시아|노르웨이|중국산|베트남|칠레|아르헨티나|미국산|캐나다|페루|일본산|원양|모리타니|세네갈|"
                       r"인도네시아|태국|아이슬란드|알래스카|뉴질랜드|호주산|외국산|해외\s*직구")
 DOMESTIC = re.compile(r"국산|국내산|연근해|동해안|동해산|서해산|남해산|제주산|우리\s*바다")
@@ -166,16 +256,22 @@ def exclude_reason(title: str, description: str, overseas: bool = False, exclude
     ex = set(DEFAULT_EXCLUDE if exclude is None else exclude)
     t, d = title or "", description or ""
     text = f"{t}\n{d}"
-    if "nonfood" in ex and (NON_SEAFOOD.search(t) or is_store_home(link, t) or many_species(t)
+    if "nonfood" in ex and (NON_SEAFOOD.search(t) or is_store_home(link, t) or many_species(t) or non_seafood_category(t) or bare_listing(t)
                             or (GEAR_WEAK.search(t) and not CATCH_SALE.search(t))):
         return "nonfood"
-    if "processed" in ex and PROCESSED.search(text):
+    if "processed" in ex and PROCESSED.search(text) and not mixed_fresh_list(t):
         return "processed"
     if "imported" in ex and (overseas or (IMPORTED.search(text) and not DOMESTIC.search(text))):
         return "imported"
     if "farmed" in ex and FARMED.search(text) and not NOT_FARMED.search(text):
         return "farmed"
     return None
+
+
+def mixed_fresh_list(title: str) -> bool:
+    """'파갈치, 한치, 자연산 활감성돔, 간장게장 …'처럼 생물 여러 가지를 파는 글에 가공품이 하나 섞인 경우."""
+    t = title or ""
+    return bool(re.search(r"자연산|활[가-힣]|생물|당일|산지직송", t)) and len(re.findall(r"[,·/]", t)) >= 3
 
 
 def is_trade(title: str, description: str, trade_site: bool = False) -> bool:

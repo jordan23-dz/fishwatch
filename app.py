@@ -148,7 +148,7 @@ class H(BaseHTTPRequestHandler):
             self._json({"running": STATE["running"], "log": STATE["log"], "error": STATE["error"], "progress": STATE["progress"],
                         "runs": runs, "totals": totals, "open": open_cnt, "config": masked(load_config()),
                         "today": date.today().isoformat(), "version": VERSION, "data_dir": str(DATA),
-                        "frozen": FROZEN, "windows": os.name == "nt"})
+                        "frozen": FROZEN, "windows": os.name == "nt", "mac": sys.platform == "darwin"})
         elif u.path == "/api/posts":
             q = {k: v[0] for k, v in parse_qs(u.query).items()}
             sql, args = "SELECT * FROM posts WHERE 1=1", []
@@ -221,6 +221,23 @@ class H(BaseHTTPRequestHandler):
             target.mkdir(parents=True, exist_ok=True)
             open_folder(target)
             self._json({"ok": True, "path": str(target)})
+        elif u.path == "/api/quit":
+            self._json({"ok": True})
+            log("앱을 종료합니다.")
+            threading.Timer(0.5, lambda: os._exit(0)).start()
+        elif u.path == "/api/open-report":
+            # 가장 최근 점검의 엑셀 보고서를 연다 (엑셀이 없으면 기본 프로그램)
+            db = open_db(load_config())
+            row = db.execute("SELECT xlsx FROM runs WHERE xlsx IS NOT NULL ORDER BY id DESC LIMIT 1").fetchone()
+            db.close()
+            p = Path(row[0]) if row and row[0] else None
+            if not p or not p.exists():
+                self._json({"ok": False, "message": "엑셀 보고서가 아직 없습니다. 점검을 한 번 실행하면 만들어집니다."})
+            else:
+                open_folder(p)
+                self._json({"ok": True, "message": f"{p.name}을(를) 엽니다.", "path": str(p)})
+        elif u.path == "/api/export-xlsx":
+            self._json(export_list(body))
         elif u.path == "/api/os-schedule":
             self._json(os_schedule(bool(body.get("enable")), body.get("time") or "08:47"))
         elif u.path == "/api/analyze":
@@ -240,6 +257,45 @@ def open_folder(path: Path) -> None:
         subprocess.Popen(["xdg-open", str(path)])
 
 
+SEV_KO = {"danger": "위반 의심", "warn": "확인 필요", "info": "참고", "ok": "기준 내"}
+
+
+def export_list(q: dict) -> dict:
+    """지금 화면의 필터(등급·사이트·검토 상태)대로 목록 전체를 엑셀로 저장하고 연다. 검토 표시도 함께 담는다."""
+    from xlsx import write_xlsx
+    sql, args = "SELECT * FROM posts WHERE 1=1", []
+    if q.get("sev"):
+        sql += " AND sev=?"; args.append(q["sev"])
+    else:
+        sql += " AND sev IN ('danger','warn')"
+    if q.get("site"):
+        sql += " AND site=?"; args.append(q["site"])
+    if q.get("review") == "open":
+        sql += " AND COALESCE(review,'')=''"
+    elif q.get("review"):
+        sql += " AND review=?"; args.append(q["review"])
+    sql += " ORDER BY CASE sev WHEN 'danger' THEN 0 WHEN 'warn' THEN 1 ELSE 2 END, first_seen DESC"
+    db = open_db(load_config())
+    cols = [c[0] for c in db.execute("SELECT * FROM posts LIMIT 0").description]
+    posts = [dict(zip(cols, r)) for r in db.execute(sql, args)]
+    db.close()
+    rows = []
+    for p in posts:
+        f = json.loads(p.get("findings") or "[]")
+        bad = [x for x in f if x.get("sev") in ("danger", "warn")] or f
+        rows.append([SEV_KO.get(p["sev"], p["sev"]), p.get("review") or "", p["site"], p["title"], p["link"], p.get("post_date") or "",
+                     ", ".join(x["name"] for x in bad),
+                     " / ".join(i["txt"] for x in bad for i in x["items"] if i["sev"] in ("danger", "warn")),
+                     p.get("query") or "", p.get("first_seen") or "", p.get("last_seen") or ""])
+    out = DATA / "reports" / f"목록-{datetime.now().strftime('%Y%m%d-%H%M%S')}.xlsx"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    write_xlsx(out, [{"name": "판매글 목록", "rows": rows, "link_col": 4, "sev_col": 0,
+                      "headers": ["등급", "검토", "사이트", "제목", "링크", "작성일", "어종", "사유", "검색어", "최초 발견", "마지막 확인"],
+                      "widths": [10, 9, 12, 50, 40, 11, 14, 60, 22, 18, 18]}])
+    open_folder(out)
+    return {"ok": True, "message": f"{len(rows)}건을 엑셀로 저장해 엽니다: {out.name}", "path": str(out)}
+
+
 def self_command(*args: str) -> list[str]:
     """이 앱을 다시 실행하는 명령 (exe면 exe, 아니면 python app.py)"""
     if FROZEN:
@@ -247,10 +303,41 @@ def self_command(*args: str) -> list[str]:
     return [sys.executable, str(HERE / "app.py"), *args]
 
 
+MAC_AGENT = Path.home() / "Library" / "LaunchAgents" / "kr.fishwatch.daily.plist"
+
+
+def mac_schedule(enable: bool, hhmm: str) -> dict:
+    """macOS: 사용자 자동 실행(launchd)에 매일 점검 등록/해제."""
+    import plistlib
+    try:
+        if MAC_AGENT.exists():
+            subprocess.run(["launchctl", "unload", str(MAC_AGENT)], capture_output=True)
+        if not enable:
+            MAC_AGENT.unlink(missing_ok=True)
+            return {"ok": True, "message": "macOS 자동 실행에서 FishWatch 점검을 지웠습니다."}
+        h, m = (int(x) for x in hhmm.split(":")[:2])
+        MAC_AGENT.parent.mkdir(parents=True, exist_ok=True)
+        MAC_AGENT.write_bytes(plistlib.dumps({
+            "Label": "kr.fishwatch.daily",
+            "ProgramArguments": self_command("--run-once"),
+            "StartCalendarInterval": {"Hour": h, "Minute": m},
+            "StandardOutPath": str(DATA / "run.log"),
+            "StandardErrorPath": str(DATA / "run.log"),
+        }))
+        r = subprocess.run(["launchctl", "load", "-w", str(MAC_AGENT)], capture_output=True, text=True)
+        if r.returncode != 0:
+            return {"ok": False, "message": (r.stderr or r.stdout).strip() or "등록하지 못했습니다."}
+        return {"ok": True, "message": f"macOS 자동 실행에 매일 {hhmm} 점검을 등록했습니다. 앱을 꺼 두어도 맥이 켜져 있고 로그인돼 있으면 실행됩니다."}
+    except (OSError, ValueError) as e:
+        return {"ok": False, "message": f"등록하지 못했습니다: {e}"}
+
+
 def os_schedule(enable: bool, hhmm: str) -> dict:
-    """Windows 작업 스케줄러에 매일 점검 등록/해제. 앱을 꺼 두어도 컴퓨터가 켜져 있으면 돈다."""
+    """Windows 작업 스케줄러 / macOS launchd에 매일 점검 등록·해제. 앱을 꺼 두어도 컴퓨터가 켜져 있으면 돈다."""
+    if sys.platform == "darwin":
+        return mac_schedule(enable, hhmm)
     if os.name != "nt":
-        return {"ok": False, "message": "Windows에서만 쓸 수 있습니다. macOS·Linux는 schedule_unix.sh를 쓰세요."}
+        return {"ok": False, "message": "Windows·macOS에서만 쓸 수 있습니다. Linux는 schedule_unix.sh를 쓰세요."}
     try:
         if enable:
             cmd = subprocess.list2cmdline(self_command("--run-once"))

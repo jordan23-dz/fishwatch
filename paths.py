@@ -14,14 +14,21 @@ import shutil
 import sys
 from pathlib import Path
 
-VERSION = "1.0.1"
+VERSION = "1.1.2"
 FROZEN = bool(getattr(sys, "frozen", False))
+
+MAC = sys.platform == "darwin"
 
 if FROZEN:
     RES = Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent))
     EXE_DIR = Path(sys.executable).resolve().parent
+    # 맥 앱(FishWatch.app/Contents/MacOS/FishWatch)이면 .app이 놓인 폴더를 기준으로
+    if MAC and EXE_DIR.name == "MacOS" and EXE_DIR.parent.parent.suffix == ".app":
+        EXE_DIR = EXE_DIR.parent.parent.parent
     if (EXE_DIR / "portable.txt").exists():
         DATA = EXE_DIR
+    elif MAC:
+        DATA = Path.home() / "Library" / "Application Support" / "FishWatch"
     else:
         base = os.environ.get("APPDATA") or os.environ.get("XDG_CONFIG_HOME") or str(Path.home())
         DATA = Path(base) / "FishWatch"

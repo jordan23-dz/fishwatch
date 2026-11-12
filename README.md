@@ -110,3 +110,14 @@ Python 3.11 이상을 설치한 뒤(설치 시 "Add python.exe to PATH" 체크) 
 - USB 등에 넣고 다니려면 exe 옆에 `portable.txt`라는 빈 파일을 두세요. 그러면 데이터를 exe 폴더에 저장합니다.
 - 앱을 꺼 두어도 매일 점검하려면 설정 → 자동 점검 → **[Windows 작업 스케줄러에 등록]**을 누릅니다(`FishWatch.exe --run-once`가 등록됨).
 - 이전 폴더판을 쓰던 사람은 exe 옆에 기존 `config.toml`, `fishwatch.db`를 두고 처음 실행하면 자동으로 옮겨집니다.
+
+
+## macOS (Apple 칩 맥)
+
+배포판에 `FishWatch-mac.zip`이 함께 올라갑니다(M1 이후 Apple 칩 맥용. 인텔 맥은 폴더판 `FishWatch.command` 사용).
+
+1. `FishWatch-mac.zip`을 내려받아 더블클릭해 풀고, 나온 **FishWatch.app**을 응용 프로그램 폴더로 옮깁니다.
+2. 처음 열 때 "확인되지 않은 개발자" 경고가 뜨면: 한 번 더블클릭 → **시스템 설정 → 개인정보 보호 및 보안** 아래의 **[그래도 열기]** → 다시 열기.
+   - "손상되었기 때문에 열 수 없습니다"가 뜨면 터미널에서 `xattr -dr com.apple.quarantine /Applications/FishWatch.app` 를 한 번 실행한 뒤 다시 엽니다(인터넷에서 받은 표시를 지우는 명령).
+3. 브라우저에 앱 화면이 열립니다. 맥 앱은 따로 창이 없으니, 끝낼 때는 **설정 → 앱 정보 → [앱 종료]**를 누릅니다.
+4. 데이터는 `~/Library/Application Support/FishWatch`에 저장됩니다. 매일 자동 점검은 설정의 **[macOS 자동 실행에 등록]**으로 켭니다.
