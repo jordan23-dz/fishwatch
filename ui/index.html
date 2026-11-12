@@ -205,8 +205,8 @@ code{font-family:var(--f-mono);font-size:12.5px;background:var(--sunk);padding:1
         <label><input type="checkbox" id="sTitleSp"> 제목에 규제 어종 이름이 없는 글 (끄면 "오늘 잡은 것들 팝니다"처럼 본문에만 어종이 있는 글도 점검)</label>
         <label><input type="checkbox" value="nonfood" class="exc"> 수산물이 아닌 상품 (액막이 명태 같은 장식품, 낚싯대·릴·채비 등 낚시용품, 사료·미끼, 판매자 홈 화면)</label>
         <label><input type="checkbox" value="processed" class="exc"> 가공품 (건조·반건조·훈제·젓갈·굴비·황태·어묵·양념 등. 냉동·손질은 포함)</label>
-        <label><input type="checkbox" value="imported" class="exc"> 수입산 (러시아·노르웨이·중국산 등, 해외 판매 사이트 상품)</label>
-        <label><input type="checkbox" value="farmed" class="exc"> 양식 ("자연산", "양식 아님"이 함께 있으면 남김)</label>
+        <label><input type="checkbox" value="imported" class="exc"> 수입산 (러시아·북해도·마가단·중국산, 통관·수입 표시, 킹크랩·스노우크랩, 해외 판매 사이트 상품. 명태·연어는 국산 표시가 없으면 수입산으로 봄)</label>
+        <label><input type="checkbox" value="farmed" class="exc"> 양식 (양식·가두리 표시. 광어·우럭·참돔·전복·가리비·톳·연어는 "자연산·해녀 채취·잡은" 등이 없으면 양식으로 봄)</label>
       </div></fieldset>
       <div class="row" style="margin:0">
         <div class="field"><label for="sMax">1회 API 호출 상한</label><input type="number" id="sMax" min="10" max="5000" step="10" style="width:120px"></div>

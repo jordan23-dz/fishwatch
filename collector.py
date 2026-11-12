@@ -104,7 +104,7 @@ NOT_TRADE = re.compile(
     r"아시는\s*분|아실까요|아는\s*분|어디서|어디\s*(?:있|가|서)|파는\s*곳|판매하는\s*곳|살\s*수\s*있는|먹을\s*수\s*있는|먹을수있는|살수있는|"
     r"추천\s*(?:해|좀|부탁)|질문|궁금|\|\s*[가-힣0-9]+(?:동|읍|면|리|가)\s*$|"
     # 시세 정리·방문 안내 글
-    r"뜻\s*[:은]|먹는\s*법|받은\s*상품|받았는데|이건\s*사야|사야\s*돼|소소한\s*한잔|의\s*진수|보는\s*법|가격\s*20\d\d|첫\s*위판|솔직한|싶었던|"
+    r"뜻\s*[:은]|선택\s*방법|올바른\s*선택|먹는\s*법|받은\s*상품|받았는데|이건\s*사야|사야\s*돼|소소한\s*한잔|의\s*진수|보는\s*법|가격\s*20\d\d|첫\s*위판|솔직한|싶었던|"
     r"시세\s*(?:·|정리|체크|비교|확인)|기준\s*정리|가기\s*전에|비용\s*체크|"
     r"\d자\s*사기|사기\s*(?:피해|사건|당|수법|예방|죄)|소송|변호사|법률|법무|판례|판결|고소|전세|월세|청약")
 SALE_INTENT = TRADE_WORDS  # 이전 이름 호환
@@ -173,7 +173,7 @@ NON_SEAFOOD = re.compile(
     r"집어제|유인제|초릿대|카고|[가-힣]{1,3}돔찌|구멍찌|막대찌|낚시\s*-\s*AliExpress|AliExpress\s*에서|"
     r"애자|진주볼|진주펄|릴대|모든\s*어종|그물망|던질찌|[가-힣]{1,6}(?<!뺀)(?<!빤)찌(?=\s*(?:-|$))|"
     # 생활·공구·기타 (수건, 체험, 해부 교재, 포크, 깔때기, 다큐, 오일·영양제)
-    r"Fukin|나사|볼트|댄스|무한\s*리필|미친\s*자들|체험|다이빙|해부|포크(?![가-힣])|스텐|깔때기|주입기|도구(?:는|가|를|\s*세트)|다큐|오일(?![가-힣])|DNA|케어|[가-힣]*츄(?![가-힣])|미운영|"
+    r"Fukin|[가-힣]*칼(?=\s|$)|다용도칼|접도|캇타|나사|볼트|댄스|무한\s*리필|미친\s*자들|체험|다이빙|해부|포크(?![가-힣])|스텐|깔때기|주입기|도구(?:는|가|를|\s*세트)|다큐|오일(?![가-힣])|DNA|케어|[가-힣]*츄(?![가-힣])|미운영|"
     # 단체 대화방 인용글: 고도리 "6월~7월사이 …"
     r"\"[^\"]*…\"?$")
 # 낚시용품일 때가 많지만 잡은 고기를 파는 글에도 나오는 말: 제목에 '잡은·조과·팝니다·kg·마리' 등이 없을 때만 낚시용품으로 본다
@@ -258,7 +258,7 @@ PROCESSED = re.compile(
     r"알포|어포|스틱|소시지|햄|통조림|캔(?![가-힣])|간편|즉석|데우기만|"
     r"소금|국수|쌀국수|묵(?![가-힣])|묵채|콩물|다시팩|간장|맛간장|[가-힣]*탕(?![가-힣])|빵(?![가-힣])|밥톳|톳밥|[가-힣]{1,3}밥(?![가-힣])|"
     r"찐톳|데친|숙회|내장|해초\s*모듬|모듬\s*해초|명태녹차|수제\s*간식|"
-    r"굴소스|소스|육수|진액|농축액|엑기스|추출물|딱지장|명란장|장조림|한천|우무채|우무(?![가-힣])|녹미채|조미|노가리|숏다리|구이|계란말이|스팀볼|순대|오징어집|버터|후리카케|새콤달콤|바베큐|구운|[가-힣]*국\s*\d|재첩국|마른\s*오징어|건\s*오징어|건오징어|피데기|오다리|백족|칼맞은")
+    r"굴소스|소스|육수|진액|농축액|엑기스|추출물|딱지장|명란장|장조림|한천|우무채|우무(?![가-힣])|녹미채|조미|노가리|숏다리|구이|계란말이|스팀볼|순대|오징어집|버터|후리카케|새콤달콤|바베큐|구운|[가-힣]*국\s*\d|재첩국|마른\s*오징어|건\s*오징어|건오징어|피데기|오다리|백족|칼맞은|마른\s*[가-힣]{1,4}|오징어\s*링")
 # 수입산 표시: 나라·산지 이름, 수입·통관, 외국에서만 나는 품종 (제목에 있으면 '국산'이라는 말이 함께 있어도 수입산으로 본다)
 IMPORTED = re.compile(r"수입|직수입|병행|러시아|러샤|노르웨이|중국|베트남|칠레|아르헨티나|미국|캐나다|페루|일본|원양|모리타니|세네갈|"
                       r"인도네시아|인도산|태국|대만|필리핀|파키스탄|에콰도르|아이슬란드|알래스카|뉴질랜드|호주|외국산|해외\s*직구|직구|"
@@ -290,8 +290,28 @@ def imported_reason(title: str, description: str, overseas: bool = False) -> boo
     from analyzer import _find_hits, _mask
     names = {r["id"] for h in _find_hits(_mask(t)) for r in h["rules"]}
     return bool(names) and names <= MOSTLY_IMPORTED_NAMES
-FARMED = re.compile(r"양식")
+FARMED = re.compile(r"(?<![서한중일])양식|가두리|축양|육상\s*수조")
 NOT_FARMED = re.compile(r"자연산|비양식|양식\s*(?:아님|아닌|아니|X|x|no)|무양식")
+# 자연에서 잡았다고 밝힌 표현
+WILD = re.compile(r"자연산|비양식|무양식|양식\s*(?:아님|아닌|아니)|해녀|채취|물질|잡은|잡아|잡았|조업|낚시로|낚은|선상|자연\s*그대로|야생|통발|자망|정치망|어획")
+# 시중에 도는 것이 거의 다 양식인 어종: 자연산이라고 밝히지 않으면 양식으로 본다
+#  광어(넙치)·우럭(조피볼락)·참돔·전복·참가리비·톳·연어
+MOSTLY_FARMED_IDS = {"neopchi", "ureok", "chamdom", "jeonbok", "garibi", "tot", "yeoneo"}
+
+
+def farmed_reason(title: str, description: str) -> bool:
+    """양식이면 True."""
+    t, d = title or "", description or ""
+    text = f"{t}\n{d}"
+    if FARMED.search(t) and not NOT_FARMED.search(t):
+        return True
+    if FARMED.search(d) and not NOT_FARMED.search(text) and not WILD.search(t):
+        return True
+    if WILD.search(text):
+        return False
+    from analyzer import _find_hits, _mask
+    ids = {r["id"] for h in _find_hits(_mask(t)) for r in h["rules"]}
+    return bool(ids) and ids <= MOSTLY_FARMED_IDS
 EXCLUDE_LABEL = {"notitle": "제목에 규제 어종 없음", "nonfood": "수산물이 아닌 상품·판매자 홈", "processed": "가공품",
                  "imported": "수입산", "farmed": "양식"}
 
@@ -315,7 +335,7 @@ def exclude_reason(title: str, description: str, overseas: bool = False, exclude
         return "processed"
     if "imported" in ex and imported_reason(t, d, overseas):
         return "imported"
-    if "farmed" in ex and FARMED.search(text) and not NOT_FARMED.search(text):
+    if "farmed" in ex and farmed_reason(t, d):
         return "farmed"
     return None
 
@@ -323,7 +343,7 @@ def exclude_reason(title: str, description: str, overseas: bool = False, exclude
 def mixed_fresh_list(title: str) -> bool:
     """'파갈치, 한치, 자연산 활감성돔, 간장게장 …'처럼 생물 여러 가지를 파는 글에 가공품이 하나 섞인 경우."""
     t = title or ""
-    if not re.search(r"자연산|활[가-힣]|생물|당일|산지직송", t):
+    if not re.search(r"활[가-힣]|생물|당일|산지직송", t):
         return False
     if len(re.findall(r"[,·/]", t)) >= 3:
         return True
