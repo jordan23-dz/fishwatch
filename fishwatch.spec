@@ -5,7 +5,7 @@
 import sys
 
 MAC = sys.platform == 'darwin'
-VERSION = '1.1.4'
+VERSION = '1.1.5'
 
 a = Analysis(
     ['app.py'],

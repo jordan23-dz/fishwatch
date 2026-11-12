@@ -14,7 +14,7 @@ import shutil
 import sys
 from pathlib import Path
 
-VERSION = "1.1.4"
+VERSION = "1.1.5"
 FROZEN = bool(getattr(sys, "frozen", False))
 
 MAC = sys.platform == "darwin"
@@ -35,6 +35,14 @@ if FROZEN:
 else:
     RES = DATA = Path(__file__).resolve().parent
     EXE_DIR = DATA
+    # exe판을 쓰다가 파이썬 실행으로 바꾼 경우: exe판의 설정·기록 폴더를 그대로 이어서 쓴다
+    if not (DATA / "config.toml").exists() and not (DATA / "portable.txt").exists():
+        if MAC:
+            _shared = Path.home() / "Library" / "Application Support" / "FishWatch"
+        else:
+            _shared = Path(os.environ.get("APPDATA") or Path.home()) / "FishWatch"
+        if (_shared / "config.toml").exists():
+            DATA = _shared
 
 DATA.mkdir(parents=True, exist_ok=True)
 
